@@ -14,6 +14,11 @@ class EntityRecognitionTest extends FunSuite with Matchers {
       List(NamedEntity("Dave", Entities.PERSON.name))
   }
 
+  test("text with a person with first and last names should return an entity categorised as a person with both names present") {
+    EntityRecognition.extractEntities("Nobody could grill sausages quite like Dave Jones ever since his experiment with veganism ended in failure") shouldBe
+      List(NamedEntity("Dave Jones", Entities.PERSON.name))
+  }
+
   test("text with a location should return a named entity categorised as a location") {
     EntityRecognition.extractEntities("Most months the weather in Seville is pleasant") shouldBe
       List(NamedEntity("Seville", Entities.LOCATION.name))
@@ -28,8 +33,8 @@ class EntityRecognitionTest extends FunSuite with Matchers {
 
   test("text with a person, location and organisation should return three entities with the correct categorisation") {
     EntityRecognition.extractEntities("Dave knew he would have to answer to the local police over his sausage mishap.  " +
-      "Nobody else in Leeds had seen anything like it!  Someone suggested he join the Vegan Society.") should contain theSameElementsAs
-      List(NamedEntity("Vegan Society", Entities.ORGANIZATION.name), NamedEntity("Dave", Entities.PERSON.name), NamedEntity("Leeds", Entities.LOCATION.name))
+      "Nobody else in Newport West had seen anything like it!  Someone suggested he join the Vegan Society.") should contain theSameElementsAs
+      List(NamedEntity("Vegan Society", Entities.ORGANIZATION.name), NamedEntity("Dave", Entities.PERSON.name), NamedEntity("Newport West", Entities.LOCATION.name))
   }
 
 }
