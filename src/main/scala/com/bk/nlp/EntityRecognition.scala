@@ -17,6 +17,16 @@ object EntityRecognition {
     _.name
   }
 
+  def main(args: Array[String]): Unit = {
+
+    import scala.io.Source
+
+    val filename = "test-data/allen-p/sent/6."
+    for(lines <- Source.fromFile(filename).getLines()) {
+      extractEntities(lines).foreach(p => println(p.text + " :  [ " + p.tag + " ]"))
+    }
+
+  }
 
   def extractEntities(text: String): List[NamedEntity] = {
     val props = new Properties
