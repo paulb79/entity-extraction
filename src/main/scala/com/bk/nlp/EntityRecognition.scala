@@ -1,6 +1,5 @@
 package com.bk.nlp
 
-
 import java.util.Properties
 
 import com.bk.nlp.model.{Entities, NamedEntity}
@@ -9,6 +8,9 @@ import edu.stanford.nlp.ling.CoreAnnotations._
 import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
 
 import scala.collection.JavaConverters._
+import scala.io.Source
+import java.io.{FileNotFoundException, IOException}
+import java.io.File
 
 object EntityRecognition {
 
@@ -18,17 +20,38 @@ object EntityRecognition {
   }
 
   def main(args: Array[String]): Unit = {
+    // ToDo scan the directory for files to process
 
-    import scala.io.Source
+    val dir = "test-data/allen-p/sent"
+    val files = getListOfFiles(dir)
 
-    val filename = "test-data/allen-p/sent/6."
-    for(lines <- Source.fromFile(filename).getLines()) {
-      extractEntities(lines).foreach(p => println(p.text + " :  [ " + p.tag + " ]"))
+    try {
+      for (file <- files) {
+        println(s"Processing ${file.toString()} ")
+        val bufFile = Source.fromFile(file)
+        for(flines <- bufFile.getLines()) {
+          extractEntities(flines).foreach(p => println(p.text + " :  [ " + p.tag + " ]"))
+        }
+        bufFile.close()
+      }
+    } catch {
+      case e: FileNotFoundException => println("Couldn't find that file.")
+      case e: IOException => println("Got an IOException!")
     }
+
 
   }
 
-  def extractEntities(text: String): List[NamedEntity] = {
+  def getListOfFiles(dir: String):List[File] = {
+    val d = new File(dir)
+    if (d.exists && d.isDirectory) {
+      d.listFiles.filter(_.isFile).toList
+    } else {
+      List[File]()
+    }
+  }
+
+  def extractEntities(text: String):List[NamedEntity] = {
     val props = new Properties
     props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, entitymentions")
     val pipeline = new StanfordCoreNLP(props)
