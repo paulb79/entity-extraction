@@ -19,4 +19,21 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 )
 
+enablePlugins(JavaAppPackaging)
+enablePlugins(UniversalPlugin)
 enablePlugins(DockerPlugin)
+maintainer in Docker := "Paul Brown <pbrown@equalexperts.com>"
+packageSummary in Docker := "Entity Extraction Service"
+packageDescription := "Docker service with entity extraction"
+
+// Only add this if you want to rename your docker image name
+packageName in Docker := "octo-laptop"
+
+import com.typesafe.sbt.packager.docker._
+
+dockerCommands ++= Seq(
+  // setting the run script executable
+  ExecCmd("RUN",
+    "chmod", "u+x",
+    s"${(defaultLinuxInstallLocation in Docker).value}/bin/${executableScriptName.value}")
+)

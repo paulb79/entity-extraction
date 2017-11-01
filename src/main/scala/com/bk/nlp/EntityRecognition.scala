@@ -20,30 +20,28 @@ object EntityRecognition {
   }
 
   def main(args: Array[String]): Unit = {
-    // ToDo scan the directory for files to process
-
-    if (args.length > 0 ) {
-      args.foreach(arg => print(s"Argument: $arg"))
-      val files = getListOfFiles(args(0))
-
-      try {
-        for (file <- files) {
-          println(s"Processing ${file.toString()} ")
-          val bufFile = Source.fromFile(file)
-          for(flines <- bufFile.getLines()) {
-
-            extractEntities(flines).foreach(p => println(p.text + " :  [ " + p.tag + " ]"))
-          }
-          bufFile.close()
-        }
-      } catch {
-        case e: FileNotFoundException => println("Couldn't find that file.")
-        case e: IOException => println("Got an IOException!")
-      }
-
+    var pathToProcess:String = ""
+    if (args.length > 0) {
+      pathToProcess = args(0)
     } else {
-      println("Please specify the path to start entity extraction on")
-      println("Example: run path/to/run")
+      pathToProcess = "/opt/octo"
+    }
+
+    val files = getListOfFiles(pathToProcess)
+
+    try {
+      for (file <- files) {
+        println(s"Processing ${file.toString()} ")
+        val bufFile = Source.fromFile(file)
+        for(flines <- bufFile.getLines()) {
+
+          extractEntities(flines).foreach(p => println(p.text + " :  [ " + p.tag + " ]"))
+        }
+        bufFile.close()
+      }
+    } catch {
+      case e: FileNotFoundException => println("Couldn't find that file.")
+      case e: IOException => println("Got an IOException!")
     }
   }
 
