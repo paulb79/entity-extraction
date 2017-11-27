@@ -1,10 +1,10 @@
 
 lazy val root = (project in file("."))
     .settings (
-      name          := "EntityExtractor",
+      name          := "Entity-extraction",
       organization  := "com.bk",
       scalaVersion  := "2.12.3",
-      version       := "0.1.0-PB-SNAPSHOT"
+      version       := "latest"
     )
 
 
@@ -31,7 +31,7 @@ javaOptions in Universal ++= Seq(
 
 maintainer in Docker := "Paul Brown <pbrown@equalexperts.com>"
 packageSummary in Docker := "Entity Extraction Service"
+description in Docker := "Entity extraction service"
 packageDescription := "Docker service with entity extraction"
-
 // Only add this if you want to rename your docker image name
-packageName in Docker := "octo-laptop"
+packageName in Docker := "octo-entity-extraction"

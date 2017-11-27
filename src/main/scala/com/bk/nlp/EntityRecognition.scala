@@ -8,9 +8,10 @@ import edu.stanford.nlp.ling.CoreAnnotations._
 import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
 
 import scala.collection.JavaConverters._
-import scala.io.Source
+import scala.io.{BufferedSource, Source}
 import java.io.{FileNotFoundException, IOException}
 import java.io.File
+import java.io.PrintWriter
 
 object EntityRecognition {
 
@@ -24,31 +25,54 @@ object EntityRecognition {
     if (args.length > 0) {
       pathToProcess = args(0)
     } else {
-      pathToProcess = "/opt/octo"
+      pathToProcess = "/opt/octo/"
     }
 
-    val files = getListOfFiles(pathToProcess)
+    val dirs = subdirs(new File(pathToProcess))
+
+    val output = new PrintWriter("outputs/" + "entities_" + scala.util.Random.alphanumeric.take(5).mkString + ".txt" )
+    output.println(":processing dataset for entity extraction " + pathToProcess)
 
     try {
-      for (file <- files) {
-        println(s"Processing ${file.toString()} ")
-        val bufFile = Source.fromFile(file)
-        for(flines <- bufFile.getLines()) {
 
-          extractEntities(flines).foreach(p => println(p.text + " :  [ " + p.tag + " ]"))
+      if (dirs.isEmpty) {
+        for (file <- getListOfFiles(new File(pathToProcess))) {
+          extractEntitiesFromFile(file, output)
         }
-        bufFile.close()
+      } else {
+        for (dir <- dirs) {
+          for (file <- getListOfFiles(dir)) {
+            extractEntitiesFromFile(file, output)
+          }
+        }
       }
+
     } catch {
       case e: FileNotFoundException => println("Couldn't find that file.")
       case e: IOException => println("Got an IOException!")
+    } finally {
+      output.close()
     }
   }
 
-  def getListOfFiles(dir: String):List[File] = {
-    val d = new File(dir)
-    if (d.exists && d.isDirectory) {
-      d.listFiles.filter(_.isFile).toList
+  def extractEntitiesFromFile(file: File, output: PrintWriter): Unit = {
+    val bufFile: BufferedSource = Source.fromFile(file)
+    for (lines <- bufFile.getLines()) {
+
+      extractEntities(lines).foreach(p => output.println(p.text + ", " + p.tag))
+
+    }
+    bufFile.close()
+  }
+
+  def subdirs(dir: File): Iterator[File] = {
+    val children = dir.listFiles.filter(_.isDirectory)
+    children.toIterator ++ children.toIterator.flatMap(subdirs _)
+  }
+
+  def getListOfFiles(dir: File): List[File] = {
+    if (dir.exists() && dir.isDirectory()) {
+      dir.listFiles.filter(_.isFile).toList
     } else {
       List[File]()
     }
