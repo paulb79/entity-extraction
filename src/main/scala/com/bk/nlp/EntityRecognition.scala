@@ -28,53 +28,28 @@ object EntityRecognition {
       pathToProcess = "/opt/octo/"
     }
 
-    val dirs = subdirs(new File(pathToProcess))
-
-    val output = new PrintWriter("outputs/" + "entities_" + scala.util.Random.alphanumeric.take(5).mkString + ".txt" )
-    output.println(":processing dataset for entity extraction " + pathToProcess)
-
     try {
 
-      if (dirs.isEmpty) {
-        for (file <- getListOfFiles(new File(pathToProcess))) {
-          extractEntitiesFromFile(file, output)
-        }
-      } else {
-        for (dir <- dirs) {
-          for (file <- getListOfFiles(dir)) {
-            extractEntitiesFromFile(file, output)
-          }
-        }
-      }
+      processFile(new File(pathToProcess), new File("/opt/output"))
 
     } catch {
       case e: FileNotFoundException => println("Couldn't find that file.")
       case e: IOException => println("Got an IOException!")
-    } finally {
-      output.close()
     }
   }
 
-  def extractEntitiesFromFile(file: File, output: PrintWriter): Unit = {
-    val bufFile: BufferedSource = Source.fromFile(file)
-    for (lines <- bufFile.getLines()) {
+  def processFile(pathToProcess: File, pathToOutput: File): Unit = {
 
-      extractEntities(lines).foreach(p => output.println(p.text + ", " + p.tag))
+    val output:PrintWriter = new PrintWriter(pathToOutput + "/output.txt")
 
-    }
-    bufFile.close()
-  }
+    for( file <- FileRoutines.listAllFiles(pathToProcess)) {
+      val bufFile: BufferedSource = Source.fromFile(file)
+      for (lines <- bufFile.getLines()) {
 
-  def subdirs(dir: File): Iterator[File] = {
-    val children = dir.listFiles.filter(_.isDirectory)
-    children.toIterator ++ children.toIterator.flatMap(subdirs _)
-  }
-
-  def getListOfFiles(dir: File): List[File] = {
-    if (dir.exists() && dir.isDirectory()) {
-      dir.listFiles.filter(_.isFile).toList
-    } else {
-      List[File]()
+        extractEntities(lines).foreach(p => output.write(p.text + ", " + p.tag))
+      }
+      bufFile.close()
+      output.flush()
     }
   }
 
@@ -94,6 +69,9 @@ object EntityRecognition {
         }
     }.filter { entity => allowableTags.contains(entity.tag) }
   }
+
+
+
 
 }
 
